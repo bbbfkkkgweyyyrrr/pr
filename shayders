@@ -1,0 +1,82 @@
+local Lighting = game:GetService("Lighting")
+local Workspace = game:GetService("Workspace")
+
+Lighting.ClockTime = 17.5
+Lighting.Brightness = 2
+Lighting.ExposureCompensation = 0.15
+Lighting.EnvironmentDiffuseScale = 1.1
+Lighting.EnvironmentSpecularScale = 1.05
+Lighting.ShadowSoftness = 0.32
+Lighting.GlobalShadows = true
+
+Lighting.Ambient = Color3.fromRGB(90,100,120)
+Lighting.OutdoorAmbient = Color3.fromRGB(130,140,180)
+Lighting.ColorShift_Top = Color3.fromRGB(120,150,255)
+Lighting.ColorShift_Bottom = Color3.fromRGB(100,130,220)
+
+for _,v in ipairs(Workspace.Terrain:GetChildren()) do
+  if v:IsA("Clouds") then
+    v:Destroy()
+  end
+end
+
+local atm = Instance.new("Atmosphere")
+atm.Density = 0.07
+atm.Offset = 0.03
+atm.Color = Color3.fromRGB(210,230,255)
+atm.Decay = Color3.fromRGB(125,150,175)
+atm.Glare = 0
+atm.Haze = 0.45
+atm.Parent = Lighting
+
+local cc = Instance.new("ColorCorrectionEffect")
+cc.TintColor = Color3.fromRGB(215,235,255)
+cc.Brightness = 0.03
+cc.Contrast = 0.07
+cc.Saturation = -0.02
+cc.Enabled = true
+cc.Parent = Lighting
+
+local bloom = Instance.new("BloomEffect")
+bloom.Intensity = 0.18
+bloom.Size = 10
+bloom.Threshold = 1.1
+bloom.Enabled = true
+bloom.Parent = Lighting
+
+local sky = Instance.new("Sky")
+sky.SkyboxBk = "rbxassetid://8130030368"
+sky.SkyboxFt = "rbxassetid://8130023900"
+sky.SkyboxLf = "rbxassetid://8130026102"
+sky.SkyboxRt = "rbxassetid://8130019002"
+sky.SkyboxDn = "rbxassetid://8130017819"
+sky.SkyboxUp = "rbxassetid://8130015428"
+sky.SunAngularSize = 0
+sky.MoonAngularSize = 11
+sky.StarCount = 0
+sky.Parent = Lighting
+
+local pallets = {}
+
+local function isPallet(m)
+  return m:IsA("Model") and m.Name == "PalletLightBrown"
+end
+
+local function apply(p)
+  p.Color = Color3.fromRGB(190,225,255)
+  p.Reflectance = 0.04
+end
+
+local function register(m)
+  if pallets[m] then return end
+  pallets[m] = true
+  for _,p in ipairs(m:GetDescendants()) do
+    if p:IsA("BasePart") then apply(p) end
+  end
+  m.DescendantAdded:Connect(function(pt)
+    if pt:IsA("BasePart") then apply(pt) end
+  end)
+  m.AncestryChanged:Connect(function(_,par)
+    if not par then pallets[m] = nil end
+  end)
+end
